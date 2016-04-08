@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AiLePlayer</string>
+    <string name="currently_playing_song">Song currently playing</string>
+    <string name="currently_playing_artist">Artist of currently playing song</string>
+    <string name="currently_playing_extra_info">Extra info for currently playing song</string>
+    <string name="drawer_allmusic_title">所有歌曲</string>
+    <string name="drawer_playlists_title">播放列表</string>
+    <string name="media_route_menu_title">播放中...</string>
+</resources>
