@@ -42,7 +42,22 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         private final VideoCastConsumerImpl mCastConsumer=new VideoCastConsumerImpl(){
                 @Override
                 public void onFailed(int resourceId, int statusCode) {
-                        super.onFailed(resourceId, statusCode);
+
+                }
+
+                @Override
+                public void onConnectionSuspended(int cause) {
+
+                }
+
+                @Override
+                public void onConnectivityRecovered() {
+
+                }
+
+                @Override
+                public void onCastAvailabilityChanged(boolean castPresent) {
+                        super.onCastAvailabilityChanged(castPresent);
                 }
         };
 }

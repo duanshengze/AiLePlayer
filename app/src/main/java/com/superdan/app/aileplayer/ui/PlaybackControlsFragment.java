@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -63,7 +64,7 @@ public class PlaybackControlsFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         View rootView=inflater.inflate(R.layout.fragment_playback_controls,container,false);
         mPlayPause = (ImageButton) rootView.findViewById(R.id.play_pause);
         mPlayPause.setEnabled(true);
@@ -77,8 +78,15 @@ public class PlaybackControlsFragment extends Fragment {
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getActivity(),)
+                Intent intent=new Intent(getActivity(),FullScreenPlayerActivity.class)
+                //设置，如果activity已经运行在历史栈的顶部将不启动
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                MediaControllerCompat controller=((FragmentActivity)getActivity()).getSupportMediaController();
+                MediaMetadataCompat metadata=controller.getMetadata();
+                if (metadata!=null){
 
+                    intent.putExtra(Music)
+                }
             }
         });
 
