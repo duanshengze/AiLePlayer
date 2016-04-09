@@ -1,5 +1,11 @@
 package com.superdan.app.aileplayer.utils;
 
+import android.util.Log;
+
+import com.superdan.app.aileplayer.BuildConfig;
+
+import java.util.Stack;
+
 /**
  * Created by Administrator on 2016/4/7.
  */
@@ -24,5 +30,40 @@ public class LogHelper {
     public static String makeLogTag(Class cls){
         return  makeLogTag(cls.getSimpleName());
     }
+
+    public static void d(String tag,Object...meaasges){
+
+        if(BuildConfig.DEBUG){
+            log(tag,Log.DEBUG,null,meaasges);
+        }
+    }
+
+
+
+
+    public static void log(String tag,int level,Throwable t,Object...messages){
+        if(Log.isLoggable(tag,level)){
+            String message;
+            if(t==null&&messages!=null&&messages.length==1){
+               // handle this common case without the extra cost of creating a stringbuffer
+                //处理这种常见的情况，无需创建一个StringBuffer的额外费用
+                message=messages[0].toString();
+            }else {
+                StringBuilder sb=new StringBuilder();//同步的  与StringBuffer不同
+                if(messages!=null){
+                    for(Object m:messages){
+                        sb.append(m);
+                    }
+                }
+                if(t!=null){
+                    sb.append("\n").append(Log.getStackTraceString(t));
+                }
+                message=sb.toString();
+            }
+            Log.println(level,tag,message);
+        }
+
+    }
+
 
 }
