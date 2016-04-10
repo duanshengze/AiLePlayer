@@ -1,66 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:padding="@dimen/playback_controls_padding">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/playback_controls_padding">
+
     <ImageView
         android:id="@+id/album_art"
-        android:src="@mipmap/ic_launcher"
         android:layout_width="@dimen/playback_controls_albumart_size"
         android:layout_height="@dimen/playback_controls_albumart_size"
-        android:scaleType="center"
+        android:layout_alignParentStart="true"
         android:contentDescription="@string/currently_playing_song"
-        android:layout_alignParentStart="true"/>
+        android:scaleType="center"
+        android:src="@mipmap/ic_launcher"/>
+
     <LinearLayout
         android:id="@+id/content"
-        android:orientation="vertical"
         android:layout_width="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_toEndOf="@+id/album_art"
         android:layout_toStartOf="@+id/play_pause"
-        android:layout_marginStart="@dimen/activity_horizontal_margin">
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/title"
-            tools:text="爱你一万年"
-            android:maxLines="1"
             android:layout_width="wrap_content"
-
             android:layout_height="wrap_content"
             android:contentDescription="@string/currently_playing_song"
+
+            android:maxLines="1"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary"
+            tools:text="爱你一万年"
             />
+
         <TextView
             android:id="@+id/artist"
-            tools:text="刘德华"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/currently_playing_artist"
             android:ellipsize="end"
             android:maxLines="1"
-            android:contentDescription="@string/currently_playing_artist"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            tools:text="刘德华"/>
+
         <TextView
             android:id="@+id/extra_info"
-            tools:text="来自本地"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/currently_playing_extra_info"
             android:ellipsize="end"
             android:maxLines="1"
             android:visibility="gone"
-            android:contentDescription="@string/currently_playing_extra_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            tools:text="来自本地"/>
     </LinearLayout>
+
     <ImageButton
         android:id="@+id/play_pause"
-        android:layout_centerVertical="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@mipmap/ic_play_arrow_black_36dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
         android:layout_margin="8dp"
         android:background="?selectableItemBackgroundBorderless"
-        android:layout_alignParentEnd="true"
-        android:tintMode="src_in"
+        android:src="@mipmap/ic_play_arrow_black_36dp"
         android:tint="@color/bt_accent"
+        android:tintMode="src_in"
         />
 </RelativeLayout>
