@@ -1,6 +1,6 @@
 package com.superdan.app.aileplayer.model;
 
-import android.media.MediaMetadata;
+
 import android.support.v4.media.MediaMetadataCompat;
 
 import com.superdan.app.aileplayer.utils.LogHelper;
@@ -12,11 +12,12 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
+
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Iterator;
+
 
 /**
  * Created by dsz on 16/4/10.
@@ -53,7 +54,7 @@ public class RemoteJSONSource implements MusicProviderSource{
 
 
     @Override
-    public Iterator<MediaMetadata> iterator() {
+    public Iterator<MediaMetadataCompat> iterator() {
 
         try {
 
@@ -127,6 +128,7 @@ public class RemoteJSONSource implements MusicProviderSource{
     private MediaMetadataCompat buildFromJSON(JSONObject json,String basePath) throws JSONException {
         String title=json.getString(JSON_TITLE);
         String album=json.getString(JSON_ALNUM);
+        String artist = json.getString(JSON_ARTIST);
         String artlist=json.getString(JSON_ARTIST);
 //种类
         String genre=json.getString(JSON_GENRE);
@@ -135,7 +137,7 @@ public class RemoteJSONSource implements MusicProviderSource{
         //曲目的号
         int trackNumber=json.getInt(JSON_TRACK_NUMBER);
         //曲目的总数
-        int trackTrackCount=json.getInt(JSON_TOTAL_TRACK_COUNT);
+        int totalTrackCount=json.getInt(JSON_TOTAL_TRACK_COUNT);
         int duration=json.getInt(JSON_DURATION)*1000;//ms
 
         LogHelper.d(TAG,"发现音乐曲目：",json);
@@ -159,16 +161,16 @@ public class RemoteJSONSource implements MusicProviderSource{
         // 添加音乐源给MediaMetadata（已经因此使用它在mediaSession.setMetadata）这不是一个好主意在现实应用软件中，因为
         //元数据会话可以被通知监听器访问。这里这样做仅仅是为了方便
         return new MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,id)
-                .putString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE,source)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM,album)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST,artlist)
-                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION,duration)
-                .putString(MediaMetadataCompat.METADATA_KEY_GENRE,genre)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI,iconUrl)
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE,title)
-                .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER,trackNumber)
-                .putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS,trackTrackCount)
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, id)
+                .putString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE, source)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
+                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, genre)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, iconUrl)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
+                .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, trackNumber)
+                .putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, totalTrackCount)
                 .build();
 
     }
