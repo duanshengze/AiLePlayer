@@ -4,6 +4,7 @@ import android.support.v4.media.MediaMetadataCompat;
 
 import com.superdan.app.aileplayer.utils.LogHelper;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -42,7 +43,7 @@ public class MusicProvider {
 
 
     public  MusicProvider(){
-        this(new );
+        this(new RemoteJSONSource() );
     }
 
 
@@ -53,6 +54,50 @@ public class MusicProvider {
         mFavoriteTracks= Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     }
+
+
+    /**
+     *获得一个iterator 通过所有歌曲的集合
+     */
+    public Iterable<MediaMetadataCompat>getShuffleMusic(){
+
+        if(mCurrentState!=State.INITIALIZED){
+            //Returns a type-safe empty, immutable List.
+            //返回一个安全的空，不可变列表
+            return Collections.emptyList();
+        }
+
+// Constructs a new instance of {@code ArrayList} with the specified initial capacity
+        //指定初始容量
+
+        List<MediaMetadataCompat>shuffled=new ArrayList<>(mMusicListById.size());
+        for(MutableMediaMetadata mutableMediaMetadata:mMusicListById.values()){
+            shuffled.add(mutableMediaMetadata.metadata);
+        }
+        //Moves every element of the list to a random new position in the list.
+        //列表的每个元素移动到列表中的随机的新位置
+        Collections.shuffle(shuffled);
+        return shuffled;
+    }
+
+
+    /**
+     * Get music tracks of the given genre
+     *获取给定题材的音乐曲目
+     */
+    public Iterable<MediaMetadataCompat>getMusicByGenre(String genre){
+        if(mCurrentState!=State.INITIALIZED||!mMusicListByGenre.containsKey(genre)){
+            return  Collections.emptyList();
+        }
+            return mMusicListByGenre.get(genre);
+
+
+    }
+
+
+
+
+
 
 
 }

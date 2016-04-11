@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="bt_accent">#00B8D4</color>
+
+    <color name="fullscreen_secondary_line_color">#E5CCCCCC</color>
+    <color name="fullscreen_line_color">#E5FFFFFF</color>
 </resources>

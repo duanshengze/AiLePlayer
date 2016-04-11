@@ -78,18 +78,67 @@ public class PlaybackControlsFragment extends Fragment {
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(getActivity(),FullScreenPlayerActivity.class)
+                Intent intent=new Intent(getActivity(),FullScreenPlayerActivity.class);
                 //设置，如果activity已经运行在历史栈的顶部将不启动
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 MediaControllerCompat controller=((FragmentActivity)getActivity()).getSupportMediaController();
                 MediaMetadataCompat metadata=controller.getMetadata();
                 if (metadata!=null){
 
-                    intent.putExtra(Music)
+                    intent.putExtra(MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION,metadata.getDescription());
+
                 }
+                startActivity(intent);
             }
         });
 
         return  rootView;
     }
+
+
+    //TODO? 为什么要用final
+    private final View.OnClickListener mButtonListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MediaControllerCompat controller=((FragmentActivity)getActivity()).getSupportMediaController();
+            PlaybackStateCompat stateObj=controller.getPlaybackState();
+            final  int state=stateObj==null?PlaybackStateCompat.STATE_NONE:stateObj.getState();
+            switch (v.getId()){
+                case R.id.play_pause:
+                     LogHelper.d(TAG,"播放键点击，现在状态播放是"+state);
+                    if (state==PlaybackStateCompat.STATE_PAUSED||state==PlaybackStateCompat.STATE_STOPPED
+                            ||state== PlaybackStateCompat.STATE_NONE){
+                        playMedia();
+                    }else if(state==PlaybackStateCompat.STATE_PLAYING||state==PlaybackStateCompat.STATE_BUFFERING
+                            ||state==PlaybackStateCompat.STATE_CONNECTING){
+                        pauseMedia();
+                    }
+
+                break;
+
+
+            }
+        }
+    };
+
+    private void playMedia(){
+        MediaControllerCompat controller=((FragmentActivity)getActivity()).getSupportMediaController();
+        if(controller!=null){
+            //Request that the player start its playback at its current position.
+            //要求播放器开始播放在当前位置
+            //来自session的控制实例
+            controller.getTransportControls().play();
+        }
+    }
+
+    private void pauseMedia(){
+        MediaControllerCompat controller = ((FragmentActivity)getActivity()).getSupportMediaController();
+        if(controller!=null){
+            //Request that the player start its playback at its current position.
+            //要求播放器在当前位置暂停
+            controller.getTransportControls().play();
+        }
+
+    }
+
 }

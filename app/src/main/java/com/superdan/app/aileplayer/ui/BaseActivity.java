@@ -12,6 +12,7 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
+import com.superdan.app.aileplayer.MusicService;
 import com.superdan.app.aileplayer.R;
 import com.superdan.app.aileplayer.utils.LogHelper;
 import com.superdan.app.aileplayer.utils.NetworkHelper;
@@ -69,7 +70,7 @@ public class BaseActivity extends ActionBarCastActivity implements MediaBrowserP
 
           */
 
-        mMediaBrowser = new MediaBrowserCompat(this, new ComponentName(this, Musi),mConnectionCallback,null);
+        mMediaBrowser = new MediaBrowserCompat(this, new ComponentName(this, MusicService.class),mConnectionCallback,null);
     }
 
 

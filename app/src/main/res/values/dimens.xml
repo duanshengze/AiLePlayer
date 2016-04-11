@@ -7,4 +7,11 @@
     <dimen name="playback_controls_padding">8dp</dimen>
     <dimen name="playback_controls_albumart_size">64dp</dimen>
     <dimen name="playback_controls_horizontal_margin">8dp</dimen>
+
+
+
+    <!--Margins for 全屏activity-->
+    <dimen name="text_view_margin">16dp</dimen>
+    <dimen name="end_text_margin">16dp</dimen>
+
 </resources>
