@@ -1,8 +1,11 @@
 package com.superdan.app.aileplayer.ui;
 
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.View;
@@ -11,6 +14,7 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.superdan.app.aileplayer.R;
 import com.superdan.app.aileplayer.utils.LogHelper;
 
 import java.util.concurrent.Executors;
@@ -53,7 +57,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
     private final Runnable mUpdateProgressTask = new Runnable() {
         @Override
         public void run() {
-
+            updateProgress();
         }
     };
 
@@ -72,10 +76,39 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
     private PlaybackStateCompat mLastPlaybackState;
     private final MediaControllerCompat.Callback mCallback=new MediaControllerCompat.Callback(){
 
+        @Override
+        public void onPlaybackStateChanged(PlaybackStateCompat state) {
+            LogHelper.d(TAG,"播放状态发生改变（onPlaybackstate changed）",state);
+            updatePlaybackState(state);
+        }
 
-
-
+        @Override
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            if(metadata!=null){
+                updateMediaDescription(metadata.getDescription());
+            }
+        }
     };
 
 
+    private final MediaBrowserCompat.ConnectionCallback mConnectionCallback=new MediaBrowserCompat.ConnectionCallback(){
+
+        @Override
+        public void onConnected() {
+            LogHelper.d(TAG,"连接上 onConnected");
+        }
+    };
+
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_full_player);
+
+    }
+
+    protected void initializeToolbar(){
+
+
+    }
 }

@@ -35,7 +35,7 @@
             android:layout_above="@+id/line3"
             android:ellipsize="end"
             android:gravity="center_horizontal"
-            android:="sans-serif-light"
+
             android:maxLines="1"
             android:shadowColor="@android:color/black"
             android:shadowRadius="20"
@@ -49,6 +49,7 @@
             android:ellipsize="end"
             android:gravity="center_horizontal"
             android:maxLines="1"
+            android:fontFamily="sans-serif-light"
             android:shadowColor="@android:color/black"
             android:shadowRadius="20"
             android:textAppearance="?android:attr/textAppearanceMedium"

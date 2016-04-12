@@ -8,6 +8,9 @@
     <string name="media_route_menu_title">播放中...</string>
 
     <string name="background_image_str">Background image for album art</string>
+    <string name="touch_to_cast">触摸连接Google投射设备</string>
 
+    <string name="open_content_drawer">Open the main menu</string>
+    <string name="close_content_drawer">Close the main menu</string>
 
 </resources>
