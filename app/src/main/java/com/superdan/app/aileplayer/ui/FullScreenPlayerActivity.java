@@ -3,8 +3,10 @@ package com.superdan.app.aileplayer.ui;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -111,4 +113,20 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
 
 
     }
+
+    private void fetchImageAsync(@NonNull MediaDescriptionCompat description){
+        if(description.getIconUri()==null){
+            return;
+        }
+        String artUrl=description.getIconUri().toString();
+
+
+
+    }
+
+
+
+
+
+
 }

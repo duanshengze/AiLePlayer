@@ -20,7 +20,7 @@ import java.util.List;
  * user interfaces that need to interact with your media session, like Android Auto. You can
  * (should) also use the same service from your app's UI, which gives a seamless playback
  * experience to the user.
- *此类提供一个MediaBrowser 通过一个服务。它暴露媒体库给浏览客户端，通过onGetRoot()和onLoadChildren()方法。
+ * 此类提供一个MediaBrowser 通过一个服务。它暴露媒体库给浏览客户端，通过onGetRoot()和onLoadChildren()方法。
  * 它也创造一个MediaSession并通过他的MediaSession.Token暴露它。这可以允许客户端去创造一个媒体控制器，连接或远程发送
  * 控制命令给MediaSession。这对用户接口很有用，同步锁需要与媒体会话的接口，像Android汽车的用户界面。你可以（应该）也使用相同的服务
  * 在您的应用程序的用户界面，这给用户一种无缝播放体验
