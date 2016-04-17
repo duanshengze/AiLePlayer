@@ -41,7 +41,7 @@ public final class AlbumArtCache {
 
     private static final AlbumArtCache sInstance = new AlbumArtCache();
 
-    private static AlbumArtCache getInstance() {
+    public static AlbumArtCache getInstance() {
         return sInstance;
     }
 

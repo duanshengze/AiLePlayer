@@ -43,7 +43,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
 
     private MenuItem mMediaRouteMenuItem;
 
-    private Toolbar mToolbar;
+    protected Toolbar mToolbar;
 
     /**
      * This class provides a handy way to tie together the functionality of
@@ -52,8 +52,8 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
      * 此类提供一个便捷的方式去联系DrawLayout的功能和ActionBar框架去实现导航抽屉推荐的设计
      */
 
-    private ActionBarDrawerToggle mDrawerToggle;
-    private DrawerLayout mDrawerLayout;
+    protected ActionBarDrawerToggle mDrawerToggle;
+    protected DrawerLayout mDrawerLayout;
 
     private boolean mToolbarInitilized;
 

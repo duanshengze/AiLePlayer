@@ -1,14 +1,17 @@
 package com.superdan.app.aileplayer.ui;
 
+
 import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
+
 import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -17,6 +20,7 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.View;
@@ -30,7 +34,6 @@ import com.superdan.app.aileplayer.MusicService;
 import com.superdan.app.aileplayer.R;
 import com.superdan.app.aileplayer.utils.LogHelper;
 
-import org.w3c.dom.Text;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -121,6 +124,12 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         @Override
         public void onConnected() {
             LogHelper.d(TAG,"连接上 onConnected");
+            try{
+                connectToSession(mMediaBrowser.getSessionToken());
+            }catch (RemoteException e){
+                LogHelper.e(TAG,e,"could not connect media controller");
+            }
+
         }
     };
 
@@ -197,7 +206,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
                             stopSeekbarUpdate();
                             break;
                         case PlaybackStateCompat.STATE_PAUSED:
-                            PlaybackStateCompat.STATE_STOPPED:
+                        case PlaybackStateCompat.STATE_STOPPED:
                             controls.play();
                             scheduleSeekbarUpdate();
                         break;
@@ -248,29 +257,68 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
 
     }
 
-    protected void initializeToolbar(){
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        if(mToolbar==null){
-            throw new IllegalStateException("Layout is required to include a Toolbar with id"+"'toolbar'");
 
+// TODO: 2016/4/17
+    private  void connectToSession(MediaSessionCompat.Token token) throws RemoteException {
+        MediaControllerCompat mediaController=new MediaControllerCompat(FullScreenPlayerActivity.this,token);
+        if (mediaController.getMetadata()==null){
+            finish();
+            return;
         }
-        mToolbar.inflateMenu(R.menu.main);
-        mDrawerLayout=(DrawerLayout)findViewById(R.id.drawer_layout);
-        if(mDrawerLayout!=null){
+        setSupportMediaController(mediaController);
+        mediaController.registerCallback(mCallback);
+        PlaybackStateCompat state=mediaController.getPlaybackState();
+        updatePlaybackState(state);
+        MediaMetadataCompat metadata =mediaController.getMetadata();
+        if (metadata!=null){
+            updateMediaDescription(metadata.getDescription());
+            updateDuration(metadata);
+        }
+        updateProgress();
+        if(state!=null&&(state.getState()==PlaybackStateCompat.STATE_PLAYING||state.getState()==PlaybackStateCompat.STATE_BUFFERING)){
+            scheduleSeekbarUpdate();
+            
+        }
 
-            NavigationView navigationView=(NavigationView)findViewById(R.id.nav_view);
-            if(navigationView==null){
-                throw  new IllegalStateException("Layout requires a NavigationView with id 'nav_view");
-                
+    }
+
+
+    private  void updateFromParams(Intent intent){
+
+        if(intent!=null){
+            MediaDescriptionCompat description=intent.getParcelableExtra(MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION);
+            if(description!=null){
+                updateMediaDescription(description);
             }
 
         }
+    }
 
+    private  void updateMediaDescription(MediaDescriptionCompat description){
+        if(description==null){
+            return;
+        }
+        LogHelper.d(TAG,"updateMedaiDescription called");
+        mLine1.setText(description.getTitle());
+        //字幕
+        mLine1.setText(description.getSubtitle());
+        fetchImageAsync(description);
+    }
+
+
+    private  void updateDuration(MediaMetadataCompat metadata){
+        if(metadata==null){
+            return;
+        }
+
+        LogHelper.d(TAG,"updateDuration callled");
+        int duration=(int)metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
+        mSeekbar.setMax(duration);
+        mEnd.setText(DateUtils.formatElapsedTime(duration/1000));
 
 
 
     }
-
     private void fetchImageAsync(@NonNull MediaDescriptionCompat description){
         if(description.getIconUri()==null){
             return;
@@ -320,8 +368,6 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         }
 
         switch (state.getState()){
-
-
             case PlaybackStateCompat.STATE_PLAYING:
                 mLoading.setVisibility(View.INVISIBLE);
                 mPlayPause.setVisibility(View.VISIBLE);

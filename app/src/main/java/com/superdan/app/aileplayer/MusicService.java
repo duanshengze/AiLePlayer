@@ -10,6 +10,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
 
+import com.superdan.app.aileplayer.playback.PlaybackManager;
+import com.superdan.app.aileplayer.utils.LogHelper;
+
 import java.util.List;
 
 /**
@@ -95,7 +98,14 @@ import java.util.List;
  *
  */
 
-public class MusicService extends MediaBrowserServiceCompat implements PlaybackM{
+public class MusicService extends MediaBrowserServiceCompat implements PlaybackManager{
+
+
+
+    private static final String TAG= LogHelper.makeLogTag(MusicService.class);
+
+    public static final String EXTRA_CONNECTED_CAST="com.superdan.app.aileplayer.CAST_NAME";
+
     @Nullable
     @Override
     public BrowserRoot onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
