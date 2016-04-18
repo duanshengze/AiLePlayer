@@ -98,7 +98,7 @@ import java.util.List;
  *
  */
 
-public class MusicService extends MediaBrowserServiceCompat implements PlaybackManager{
+public class MusicService extends MediaBrowserServiceCompat implements PlaybackManager.P{
 
 
 

@@ -2,12 +2,14 @@ package com.superdan.app.aileplayer.ui;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.design.internal.NavigationMenuView;
+
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
+
+import android.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -250,13 +252,66 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        mCastManager.addVideoCastConsumer(mCastConsumer);
+        mCastManager.incrementUiCounter();
+        // Whenever the fragment back stack changes, we may need to update the
+        // action bar toggle: only top level screens show the hamburger-like icon, inner
+        // screens - either Activities or fragments - show the "Up" icon instead
+        getFragmentManager().addOnBackStackChangedListener(mBackStackChangedListener);
+
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(mDrawerToggle!=null){
+            mDrawerToggle.onConfigurationChanged(newConfig);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mCastManager.removeVideoCastConsumer(mCastConsumer);
+        mCastManager.decrementUiCounter();
+        getFragmentManager().removeOnBackStackChangedListener(mBackStackChangedListener);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.main,menu);
+        mMediaRouteMenuItem=mCastManager.addMediaRouterButton(menu,R.id.media_route_menu_item);
+        return  true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(mDrawerToggle!=null&&mDrawerToggle.onOptionsItemSelected(item)){
+            return  true;
+        }
+        // If not handled by drawerToggle, home needs to be handled by returning to previous
+        if(item!=null&&item.getItemId()==android.R.id.home){
+            onBackPressed();
+            return  true;
+        }
+        return  super.onOptionsItemSelected(item);
+
+    }
+
+    @Override
     public void onBackPressed() {
         if(mDrawerLayout!=null&&mDrawerLayout.isDrawerOpen(GravityCompat.START)){
             mDrawerLayout.closeDrawers();
             return;
         }
         //否则将返回一个之前的Fragment堆
-        FragmentManager fragmentManager=getSupportFragmentManager();
+        FragmentManager fragmentManager=getFragmentManager();
         if(fragmentManager.getBackStackEntryCount()>0){
             fragmentManager.popBackStack();
         }else {
@@ -324,7 +379,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         if(MusicPlayerActivity.class.isAssignableFrom(getClass())){
             navigationView.setCheckedItem(R.id.navigayion_allmusic);
         }else if ((PlaceholderActivity.class.isAssignableFrom(getClass()))){
-
             navigationView.setCheckedItem(R.id.navigation_playlists);
         }
 
@@ -332,7 +386,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     }
 
 
-    //?ToDO
+    // TODO: 16/4/17 ?
     protected  void updateDrawerToggle(){
         if (mDrawerToggle==null)
             return;
@@ -374,6 +428,9 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
 
 
     }
+
+
+
 
 
 }

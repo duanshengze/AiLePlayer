@@ -160,11 +160,13 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         }
         mBackgroundImage=(ImageView)findViewById(R.id.background_image);
         mPauseDrawable= ContextCompat.getDrawable(this,R.mipmap.uamp_ic_pause_white_48dp);
-        mPauseDrawable=ContextCompat.getDrawable(this,R.mipmap.uamp_ic_play_arrow_white_48dp);
+        mPlayDrawable=ContextCompat.getDrawable(this,R.mipmap.uamp_ic_play_arrow_white_48dp);
+        mPlayPause=(ImageView)findViewById(R.id.play_pause) ;
         mSkipNext=(ImageView)findViewById(R.id.next);
         mSkipPrev=(ImageView)findViewById(R.id.prev);
         mStart=(TextView)findViewById(R.id.startText);
         mEnd=(TextView)findViewById(R.id.endText);
+        mSeekbar=(SeekBar)findViewById(R.id.seekBar1);
         mLine1=(TextView)findViewById(R.id.line1);
         mLine2=(TextView)findViewById(R.id.line2);
         mLine3=(TextView)findViewById(R.id.line3);
@@ -247,7 +249,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
 
             }
         });
-//如果我们不从一个配置变化创造 只更新来至intent
+        //如果我们不从一个配置变化创造 只更新来至intent
         if(savedInstanceState==null){
             updateFromParams(getIntent());
         }
@@ -301,7 +303,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         LogHelper.d(TAG,"updateMedaiDescription called");
         mLine1.setText(description.getTitle());
         //字幕
-        mLine1.setText(description.getSubtitle());
+        mLine2.setText(description.getSubtitle());
         fetchImageAsync(description);
     }
 
@@ -476,9 +478,6 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
              *
              */
             currentPosition+=(int)timeDelta*mLastPlaybackState.getPlaybackSpeed();
-
-
-
             mSeekbar.setProgress((int)currentPosition);
         }
 
