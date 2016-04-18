@@ -27,7 +27,7 @@ public final class AlbumArtCache {
      * MediaDescription.getIconBitmap). This should not be bigger than necessary, because
      * the MediaDescription object should be lightweight. If you set it too high and try to
      * serialize the MediaDescription, you may get FAILED BINDER TRANSACTION errors.
-     * 对一个图标的合理的分辨率（一般 MediaDescription.getIconBitmap）。不应该比需要的还要打，因为MediaDescription
+     * 对一个图标的合理的分辨率（一般 MediaDescription.getIconBitmap）。不应该比需要的还要大，因为MediaDescription
      * 对象应该轻量级，如果你设置太高，试图序列化MediaDescription，你将得到FAILED BINDER TRANSACTION错误
      */
     private static final int MAX_ART_WIDTH_ICON = 128;
@@ -86,7 +86,8 @@ public final class AlbumArtCache {
         // requests and bitmap rescales. For production-level apps, we recommend you use
         // a proper image loading library, like Glide.
         /**
-          *为了简单起见，同步多线程抓取请求处理不好。他们可能会导致昂贵的冗余操作，如Http请求和位图的缩放，对于产品级的应用程序，
+          *为了简单起见，同步多线程抓取请求处理不好。他们可能会导致昂贵的冗余操作，
+         * 如Http请求和位图的缩放，对于产品级的应用程序，
          * 我们建议使用合适的图片加载库：Glide
           */
         Bitmap[]bitmap=mCache.get(artUrl);
@@ -106,8 +107,7 @@ public final class AlbumArtCache {
                     Bitmap bitmap= BitmapHelper.fetchAndRescaleBitmap(artUrl,MAX_ART_WIDTH,MAX_ART_HEIGHT);
                     Bitmap icon=BitmapHelper.scaleBitmap(bitmap,MAX_ART_WIDTH_ICON,MAX_ART_HEIGHT_ICON);
                     bitmaps=new Bitmap[]{bitmap,icon};
-
-
+                    mCache.put(artUrl,bitmaps);
                 }catch (IOException e){
                     return null;
                 }

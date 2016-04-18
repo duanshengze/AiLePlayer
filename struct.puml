@@ -1,0 +1,16 @@
+@startuml
+abstract class AbstractList
+abstract AbstractCollection
+interface List
+interface Collection
+
+List <|-- AbstractList
+Collection<|-- List
+class ArrayList{
+    Object[]elementData
+    size()
+}
+
+
+
+@enduml
