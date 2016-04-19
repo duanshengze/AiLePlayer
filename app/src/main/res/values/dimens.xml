@@ -7,9 +7,11 @@
     <dimen name="playback_controls_padding">8dp</dimen>
     <dimen name="playback_controls_albumart_size">64dp</dimen>
     <dimen name="playback_controls_horizontal_margin">8dp</dimen>
+        <!--媒体浏览器的ListView-->
+    <dimen name="media_item_height">72dp</dimen>
 
-
-
+    <dimen name="media_item_text_margin_start">60dp</dimen>
+    <dimen name="media_item_icon_margin_start">12dp</dimen>
     <!--Margins for 全屏activity-->
     <dimen name="text_view_margin">16dp</dimen>
     <dimen name="end_text_margin">16dp</dimen>

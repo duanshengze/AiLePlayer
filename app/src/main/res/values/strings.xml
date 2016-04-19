@@ -6,6 +6,7 @@
     <string name="drawer_allmusic_title">所有歌曲</string>
     <string name="drawer_playlists_title">播放列表</string>
     <string name="media_route_menu_title">播放中...</string>
+    <string name="play_item">Play item</string>
     <string name="casting_to_device">Casting to %1$s</string>
     <string name="background_image_str">Background image for album art</string>
     <string name="touch_to_cast">触摸连接Google投射设备</string>

@@ -1,5 +1,6 @@
 package com.superdan.app.aileplayer.ui;
 
+import android.media.browse.MediaBrowser;
 import android.os.Bundle;
 
 import com.superdan.app.aileplayer.utils.LogHelper;
@@ -14,7 +15,7 @@ import com.superdan.app.aileplayer.utils.LogHelper;
  * 这个播放器包含媒体浏览器和媒体控制器实例，当它被创建时将创建媒体浏览器并且在onStart（）和onStop（）方法类连接或者断开
  * 因此，媒体浏览器将一直连接当activity在运行时
  */
-public class MusicPlayerActivity extends BaseActivity {
+public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFragment. {
 
     private static final String TAG= LogHelper.makeLogTag(MusicPlayerActivity.class);
     private static final String SAVED_MEDIA_ID="com.superdan.app.aileplayer.MEDIA_ID";
