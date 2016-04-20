@@ -3,6 +3,7 @@ package com.superdan.app.aileplayer.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -50,31 +51,44 @@ public class MediaItemViewHolder {
 
         }else {
             holder=(MediaItemViewHolder)convertView.getTag();
-            cacheState=convertView.getTag(R.id.tag_mediaitem_state_cache,state);
-
+            cacheState=(Integer) convertView.getTag(R.id.tag_mediaitem_state_cache);
         }
 
             holder.mTitleView.setText(description.getSubtitle());
             holder.mDescriptionView.setText(description.getSubtitle());
-
+        // If the state of convertView is different, we need to adapt the view to the
+        // new state.
         if(cacheState==null||cacheState!=state){
 
             switch (state){
                 case  STATE_PALYABLE:
-
                     Drawable pauseDrawable= ContextCompat.getDrawable(activity,R.drawable.ic_play_arrow_googblue_36dp);
                     DrawableCompat.setTintList(pauseDrawable,sColorStateNotPlaying);
-                    holder.
-
+                    holder.mImageView.setImageDrawable(pauseDrawable);
+                    holder.mImageView.setVisibility(View.VISIBLE);
                     break;
-
+                case STATE_PLAYING:
+                    AnimationDrawable animation=(AnimationDrawable)ContextCompat.getDrawable(activity,R.drawable.ic_equalizer_white_36dp);
+                    DrawableCompat.setTintList(animation,sColorStatePlaying);
+                    holder.mImageView.setImageDrawable(animation);
+                    holder.mImageView.setVisibility(View.VISIBLE);
+                    animation.start();
+                    break;
+                case STATE_PAUSED:
+                    Drawable playDrawable=ContextCompat.getDrawable(activity,R.mipmap.ic_equalizer1_white_36dp);
+                    DrawableCompat.setTintList(playDrawable,sColorStatePlaying);
+                    holder.mImageView.setImageDrawable(playDrawable);
+                    holder.mImageView.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    holder.mImageView.setVisibility(View.INVISIBLE);
 
             }
-
+            convertView.setTag(R.id.tag_mediaitem_state_cache,state);
         }
 
 
-
+        return  convertView;
     }
 
 
