@@ -70,7 +70,7 @@ public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFra
         }
        navigateToBrowser(String mediaId);
     }
-
+//TODo
         private void navigateToBrowser(String mediaId){
 
             LogHelper.d(TAG,"navigateToBrowser,mediaId="+mediaId);
