@@ -59,10 +59,6 @@ public final class AlbumArtCache {
             }
         };
 
-
-
-
-
     }
 
 

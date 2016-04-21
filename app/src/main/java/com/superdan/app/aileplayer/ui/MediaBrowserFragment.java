@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -43,7 +45,7 @@ public class MediaBrowserFragment extends Fragment{
     private static final String ARG_MEDIA_ID="media_id";
 
     private  BrowseAdapter mBrowseAdapter;
-    private  String mediaId;
+    private  String mMediaId;
     private MediaFragmentListener mMediaFragmentListener;
     private View mErrorView;
     private TextView mErrorMessage;
@@ -52,7 +54,7 @@ public class MediaBrowserFragment extends Fragment{
         private boolean oldOnline=false;
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(mediaId!=null){
+            if(mMediaId!=null){
                 boolean isOnline= NetworkHelper.isOnline(context);
                 if(isOnline!=oldOnline){
                     oldOnline=isOnline;
@@ -144,11 +146,73 @@ public class MediaBrowserFragment extends Fragment{
         return  rootView;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        MediaBrowserCompat mediaBrowser=mMediaFragmentListener.getMediaBrowser();
+        LogHelper.d(TAG,"fragment.OnStart,mediaId=",mMediaId," onConnected="+mediaBrowser.isConnected());
+        if(mediaBrowser.isConnected()){
+            onConnected();
+        }
+        // Registers BroadcastReceiver to track network connection changes.
+
+        this.getActivity().registerReceiver(mConnectivityChangeReceiver,new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        MediaBrowserCompat mediaBrowser=mMediaFragmentListener.getMediaBrowser();
+        if(mediaBrowser!=null&&mediaBrowser.isConnected()&&mMediaId!=null){
+            mediaBrowser.unsubscribe(mMediaId);
+        }
+        MediaControllerCompat controller=((FragmentActivity)getActivity()).getSupportMediaController();
+        if(controller!=null){
+            controller.unregisterCallback(mMediaControllerCallback);
+        }
+        getActivity().unregisterReceiver(mConnectivityChangeReceiver);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mMediaFragmentListener=null;
+    }
+
     // Called when the MediaBrowser is connected. This method is either called by the
     // fragment.onStart() or explicitly by the activity in the case where the connection
     // completes after the onStart()
 
     public void onConnected(){
+
+        if(isDetached()){
+            return;
+        }
+        mMediaId=getMediaId();
+        if(mMediaId==null){
+            mMediaId=mMediaFragmentListener.getMediaBrowser().getRoot();
+        }
+        updateTitle();
+
+        // Unsubscribing before subscribing is required if this mediaId already has a subscriber
+        // on this MediaBrowser instance. Subscribing to an already subscribed mediaId will replace
+        // the callback, but won't trigger the initial callback.onChildrenLoaded.
+        //
+        // This is temporary: A bug is being fixed that will make subscribe
+        // consistently call onChildrenLoaded initially, no matter if it is replacing an existing
+        // subscriber or not. Currently this only happens if the mediaID has no previous
+        // subscriber or if the media content changes on the service side, so we need to
+        // unsubscribe first.
+
+
+
+        mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
+        mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId,mSubscriptionCallback);
+        //Add MediaController callback so we can redraw the list when metadata changes:
+        MediaControllerCompat controller=((FragmentActivity)getActivity()).getSupportMediaController();
+        if(controller!=null){
+            controller.registerCallback(mMediaControllerCallback);
+        }
 
     }
     private void checkForUserVisibleErrors(boolean forceError){
@@ -181,6 +245,45 @@ public class MediaBrowserFragment extends Fragment{
                 " showError=",showError," isOnline= ",NetworkHelper.isOnline(getActivity()));
 
     }
+
+
+
+
+
+
+    public String getMediaId(){
+        Bundle args=getArguments();
+        if(args!=null){
+            return  args.getString(ARG_MEDIA_ID);
+        }
+        return  null;
+    }
+
+
+    public void setMediaId(String mediaId){
+        Bundle args=new Bundle(1);
+        args.putString(MediaBrowserFragment.ARG_MEDIA_ID,mediaId);
+        setArguments(args);
+    }
+
+    private void updateTitle(){
+
+        if(MediaIDHelper.MEDIA_ID_ROOT.equals(mMediaId)){
+            mMediaFragmentListener.setToolbarTitle(null);
+            return;
+        }
+        MediaBrowserCompat mediaBrowser=mMediaFragmentListener.getMediaBrowser();
+        mediaBrowser.getItem(mMediaId, new MediaBrowserCompat.ItemCallback() {
+            @Override
+            public void onItemLoaded(MediaBrowserCompat.MediaItem item) {
+                mMediaFragmentListener.setToolbarTitle(
+                        item.getDescription().getTitle()
+                );
+            }
+        });
+
+    }
+
 
     private static class BrowseAdapter extends ArrayAdapter<MediaBrowserCompat.MediaItem>{
         public BrowseAdapter(Activity context){
