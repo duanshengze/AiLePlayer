@@ -4,9 +4,6 @@ import android.util.Log;
 
 import com.superdan.app.aileplayer.BuildConfig;
 
-import java.util.Objects;
-import java.util.Stack;
-
 /**
  * Created by Administrator on 2016/4/7.
  */
@@ -46,6 +43,16 @@ public class LogHelper {
     public  static void e(String tag,Throwable t,Object...messages){
         log(tag,Log.ERROR,t,messages);
     }
+
+
+    public  static  void w(String tag,Object...messages){
+        log(tag,Log.WARN,null,messages);
+    }
+
+    public static  void w(String tag,Throwable t,Object...messages){
+        log(tag,Log.WARN,t,messages);
+    }
+
 
 
     public static void log(String tag,int level,Throwable t,Object...messages){
