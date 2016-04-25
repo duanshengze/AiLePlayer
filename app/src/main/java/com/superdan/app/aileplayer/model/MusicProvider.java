@@ -94,8 +94,18 @@ public class MusicProvider {
 
     }
 
+    public  boolean isFavorite(String musicId){
+        return  mFavoriteTracks.contains(musicId);
+    }
 
+    /**
+     * @param musicId 唯一id，没有分层的音乐Id
+     * @return
+     */
+    public MediaMetadataCompat getMusic(String musicId){
+            return  mMusicListById.containsKey(musicId)?mMusicListById.get(musicId).metadata:null;
 
+    }
 
 
 

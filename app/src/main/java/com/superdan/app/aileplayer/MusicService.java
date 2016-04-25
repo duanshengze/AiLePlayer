@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 import com.superdan.app.aileplayer.playback.PlaybackManager;
 import com.superdan.app.aileplayer.utils.LogHelper;
@@ -98,9 +99,7 @@ import java.util.List;
  *
  */
 
-public class MusicService extends MediaBrowserServiceCompat implements PlaybackManager.P{
-
-
+public class MusicService extends MediaBrowserServiceCompat implements PlaybackManager.PlaybackServiceCallback{
 
     private static final String TAG= LogHelper.makeLogTag(MusicService.class);
 
@@ -114,6 +113,26 @@ public class MusicService extends MediaBrowserServiceCompat implements PlaybackM
 
     @Override
     public void onLoadChildren(String parentId, Result<List<MediaBrowserCompat.MediaItem>> result) {
+
+    }
+
+    @Override
+    public void onPlaybackStart() {
+
+    }
+
+    @Override
+    public void onNotificationRequired() {
+
+    }
+
+    @Override
+    public void onPlaybackStop() {
+
+    }
+
+    @Override
+    public void onPlaybackStateUpdated(PlaybackStateCompat newState) {
 
     }
 }

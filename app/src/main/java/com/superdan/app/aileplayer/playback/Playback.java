@@ -4,7 +4,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 
 /**
  * Created by dsz on 16/4/10.
- * Interface representing either Local or Remote Playback. The {@link MusicService} works
+ * Interface representing either Local or Remote Playback. The {@link com.superdan.app.aileplayer.MusicService} works
  * directly with an instance of the Playback object to make the various calls such as
  * play, pause etc.
  *
@@ -15,7 +15,7 @@ public interface Playback {
     /**
      * Start/setup the playback.
      * Resources/listeners would be allocated by implementations.
-     * 开始安装播放
+     * 开始播放
      * 资源/监听器将被实现类分配
      */
     void start();
@@ -90,6 +90,11 @@ public interface Playback {
      */
     void play(MediaSessionCompat.QueueItem item);
 
+
+    /**
+     *pause the current playing item
+     */
+    void  pause();
     /**
      * Seek to the given position
      *

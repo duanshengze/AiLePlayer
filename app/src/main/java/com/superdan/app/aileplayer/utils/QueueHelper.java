@@ -80,6 +80,12 @@ public class QueueHelper {
     }
 
 
+    /**
+     * 获得队列中 mediaID所对应的序列号
+     * @param queue
+     * @param mediaID
+     * @return
+     */
     public static int getMusicIndexOnQueue(Iterable<MediaSessionCompat.QueueItem>queue,String mediaID){
 
         int index=0;
@@ -88,7 +94,6 @@ public class QueueHelper {
                 return  index;
             }
             index++;
-
         }
         return -1;
     }

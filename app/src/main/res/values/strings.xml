@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">AiLePlayer</string>
+    <string name="favorite">Favorite</string>
+    <string name="browse_musics_by_genres_subtitle">%1$s songs</string>
     <string name="currently_playing_song">Song currently playing</string>
     <string name="currently_playing_artist">Artist of currently playing song</string>
     <string name="currently_playing_extra_info">Extra info for currently playing song</string>
