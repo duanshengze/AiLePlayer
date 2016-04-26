@@ -98,7 +98,9 @@ public class QueueHelper {
         return -1;
     }
 
-    public static  int getMusicIndexQueue(Iterable<MediaSessionCompat.QueueItem>queue,long queueId){
+
+
+    public static  int getMusicIndexOnQueue(Iterable<MediaSessionCompat.QueueItem>queue,long queueId){
 
 
         int index=0;

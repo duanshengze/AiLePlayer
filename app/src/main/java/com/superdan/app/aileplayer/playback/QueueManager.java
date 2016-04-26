@@ -2,6 +2,7 @@ package com.superdan.app.aileplayer.playback;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -74,6 +75,16 @@ public class QueueManager {
         return  index>=0;
     }
 
+    public boolean setCurrentQueueItem(long mediaId){
+        int index=QueueHelper.getMusicIndexOnQueue(mPlayingQueue,mediaId);
+        setCurrentQueueIndex(index);
+        return  index>=0;
+    }
+
+    protected void setQueueFromSearch(String query, Bundle extras){
+        setCurrentQueue(mResources.getString(R.string.search_queue_title),QueueHelper.getPlayingQueueFromSearch(query,extras,mMusicProvider));
+
+    }
 
 
     public  void setQueueFromMusic(String mediaId){
@@ -126,8 +137,15 @@ public class QueueManager {
 
     }
 
+    public void setRandomQueue(){
+        setCurrentQueue(mResources.getString(R.string.random_queue_title),QueueHelper.getRandomQueue(mMusicProvider));
+    }
 
 
+
+    protected  void setCurrentQueue(String title,List<MediaSessionCompat.QueueItem>newQueue){
+        setCurrentQueue(title,newQueue,null);
+    }
 
     protected  void setCurrentQueue(String title,List<MediaSessionCompat.QueueItem>newQueue,String initialMediaId){
         mPlayingQueue=newQueue;
@@ -141,6 +159,9 @@ public class QueueManager {
     }
 
 
+    /**
+     * 更新媒体数据，当前列表歌曲信息（专辑封面下载）
+     */
     public  void updateMetadata(){
 
         MediaSessionCompat.QueueItem currentMusic=getCurrentMusic();

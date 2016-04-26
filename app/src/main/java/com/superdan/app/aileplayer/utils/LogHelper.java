@@ -53,8 +53,21 @@ public class LogHelper {
         log(tag,Log.WARN,t,messages);
     }
 
+    public  static void  v(String tag,Throwable t,Object...messages){
+        log(tag,Log.VERBOSE,t,messages);
+    }
 
+    public static  void v(String tag,Object... messages){
+        log(tag,Log.VERBOSE,null,messages);
+    }
 
+    public  static void  i(String tag,Throwable t,Object...messages){
+        log(tag,Log.INFO,t,messages);
+    }
+
+    public static  void i(String tag,Object... messages){
+        log(tag,Log.INFO,null,messages);
+    }
     public static void log(String tag,int level,Throwable t,Object...messages){
         if(Log.isLoggable(tag,level)){
             String message;

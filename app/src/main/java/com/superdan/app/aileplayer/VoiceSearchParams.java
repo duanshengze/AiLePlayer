@@ -43,11 +43,35 @@ public final class VoiceSearchParams {
                 }else {
                     genreKey="android.intent.extra.genre";
                 }
+
+                String mediaFocus=extras.getString(MediaStore.EXTRA_MEDIA_FOCUS);
+                if(TextUtils.equals(mediaFocus,MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE)){
+                    isGenereFocus=true;
+                    genre=extras.getString(genreKey);
+                    if(TextUtils.isEmpty(genre)){
+                        genre=query;
+                    }
+                }else if (TextUtils.equals(mediaFocus,MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE)){
+                    isArtistFocus=true;
+                    genre=extras.getString(genreKey);
+                    artist=extras.getString(MediaStore.EXTRA_MEDIA_ARTIST);
+
+                }else if(TextUtils.equals(mediaFocus,MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE)){
+                    //在艺术集中搜索，艺术家和流派都要被设置：
+                    isAlbumFocus=true;
+                    album=extras.getString(MediaStore.EXTRA_MEDIA_ALBUM);
+                    genre=extras.getString(genreKey);
+                    artist=extras.getString(MediaStore.EXTRA_MEDIA_ARTIST);
+                }else  if(TextUtils.equals(mediaFocus,MediaStore.Audio.Media.ENTRY_CONTENT_TYPE)){
+                    isSongFocus=true;
+                    song=extras.getString(MediaStore.EXTRA_MEDIA_TITLE);
+                    album=extras.getString(MediaStore.EXTRA_MEDIA_ALBUM);
+                    genre=extras.getString(genreKey);
+                    artist=extras.getString(MediaStore.EXTRA_MEDIA_ARTIST);
+                }
+
+
             }
-
-
-
-
 
 
         }
