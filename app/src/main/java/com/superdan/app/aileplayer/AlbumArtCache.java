@@ -13,7 +13,7 @@ import java.io.IOException;
  * Created by dsz on 16/4/14.
  * Implements a basic cache of album arts, with async loading support.
  * <p/>
- * 实现专辑艺术的基本缓存，有异步加载的功能
+ * 实现专辑艺术的基本缓存,有异步加载的功能
  */
 public final class AlbumArtCache {
     private static final String TAG = LogHelper.makeLogTag(AlbumArtCache.class);
