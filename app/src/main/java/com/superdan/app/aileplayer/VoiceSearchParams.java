@@ -12,8 +12,8 @@ import android.text.TextUtils;
 public final class VoiceSearchParams {
     public final String query;
     public boolean isAny;
-    public  boolean isUnstructured;
-    public boolean isGenereFocus;
+    public  boolean isUnstructed;
+    public boolean isGenreFocus;
     public  boolean isArtistFocus;
     public boolean isAlbumFocus;
     public boolean isSongFocus;
@@ -35,7 +35,7 @@ public final class VoiceSearchParams {
             isAny=true;
         }else {
             if(extras==null){
-                isUnstructured=true;
+                isUnstructed=true;
             }else {
                 String genreKey;
                 if(Build.VERSION.SDK_INT>=21){
@@ -46,7 +46,7 @@ public final class VoiceSearchParams {
 
                 String mediaFocus=extras.getString(MediaStore.EXTRA_MEDIA_FOCUS);
                 if(TextUtils.equals(mediaFocus,MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE)){
-                    isGenereFocus=true;
+                    isGenreFocus=true;
                     genre=extras.getString(genreKey);
                     if(TextUtils.isEmpty(genre)){
                         genre=query;
@@ -83,8 +83,8 @@ public final class VoiceSearchParams {
     public String toString() {
         return "query="+query
                 +" isAny="+isAny
-                +" isUnstructures="+isUnstructured
-                +" isGenreFocus="+isGenereFocus
+                +" isUnstructures="+isUnstructed
+                +" isGenreFocus="+isGenreFocus
                 +" isArtistFocus="+isArtistFocus
                 +" isSongFocus="+isSongFocus
                 +" genre="+genre

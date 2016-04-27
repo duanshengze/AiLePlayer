@@ -11,16 +11,15 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.provider.Settings;
-import android.support.v7.app.NotificationCompat;
+import android.os.RemoteException;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.NotificationCompat;
 
-import com.superdan.app.aileplayer.playback.Playback;
 import com.superdan.app.aileplayer.ui.MusicPlayerActivity;
 import com.superdan.app.aileplayer.utils.LogHelper;
 import com.superdan.app.aileplayer.utils.ResourceHelper;
@@ -96,7 +95,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
      };
 
 
-    public MediaNotificationManager(MusicService service){
+    public MediaNotificationManager(MusicService service)throws RemoteException{
 
         mService=service;
         updateSessionToken();
@@ -126,7 +125,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
      * updated. The notification will automatically be removed if the session is
      * destroyed before {@link #stopNotification} is called.
      */
-    private  void startNotification(){
+    public   void startNotification(){
 
         if(!mStarted){
             mMetadata=mController.getMetadata();
@@ -137,23 +136,86 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 mController.registerCallback(mCb);
                 IntentFilter filter=new IntentFilter();
                 filter.addAction(ACTION_NEXT);
+                filter.addAction(ACTION_PAUSE);
+                filter.addAction(ACTION_PREV);
+                filter.addAction(ACTION_PLAY);
+                filter.addAction(ACTION_STOP_CASTING);
+                mService.registerReceiver(this,filter);
+                mService.startForeground(NOTIFICATION_ID,notification);
+                mStarted=true;
 
             }
         }
 
     }
 
-    private
+    public  void stopNotification(){
+
+        if(mStarted){
+            mStarted=false;
+            mController.unregisterCallback(mCb);
+            try {
+                mNotificationManager.cancel(NOTIFICATION_ID);
+                mService.unregisterReceiver(this);
+            }catch (IllegalArgumentException ex){
+
+            }
+            mService.stopForeground(true);
+        }
+
+    }
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        final  String action=intent.getAction();
+        LogHelper.d(TAG,"Received intent with action"+action);
+        switch (action){
+            case ACTION_PAUSE:
+                mTransportControls.pause();
+                break;
+            case  ACTION_PLAY:
+                mTransportControls.play();
+                break;
+            case  ACTION_NEXT:
+                mTransportControls.skipToNext();
+                break;
+            case ACTION_PREV:
+                mTransportControls.skipToPrevious();
+                break;
+            case  ACTION_STOP_CASTING:
+                Intent i=new Intent(context,MusicService.class);
+                i.setAction(MusicService.ACTION_CMD);
+                i.putExtra(MusicService.CMD_NAME,MusicService.CMD_STOP_CASTING);
+                mService.startService(i);
+                break;
+            default:
+                LogHelper.w(TAG,"Unknown intent ignore,Action="+action);
+        }
+    }
+
+
 
     /**
      * Update the state based on a change on the session token. Called either when
      * we are running for the first time or when the media session owner has destroyed the session
      * (see {@link android.media.session.MediaController.Callback#onSessionDestroyed()})
      */
-    private void updateSessionToken(){
+    private void updateSessionToken()throws RemoteException{
         MediaSessionCompat.Token freashToken=mService.getSessionToken();
         if(mSessionToken==null&&freashToken!=null||mSessionToken!=null&&mSessionToken.equals(freashToken)){
+                if(mController!=null){
+                    mController.unregisterCallback(mCb);
+                }
+            mSessionToken=freashToken;
 
+            if(mSessionToken!=null){
+
+                mController=new MediaControllerCompat(mService,mSessionToken);
+                mTransportControls=mController.getTransportControls();
+                if (mStarted){
+                    mController.registerCallback(mCb);
+                }
+
+            }
         }
 
     }
@@ -329,8 +391,5 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
 
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
 
-    }
 }

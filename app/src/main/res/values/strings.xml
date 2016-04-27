@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">AiLePlayer</string>
     <string name="favorite">Favorite</string>
+
+
+    <string name="error_no_metadata">Unable to retrieve metadata.</string>
     <string name="browse_musics_by_genres_subtitle">%1$s songs</string>
     <string name="browse_genres">Genres</string>
     <string name="browse_genre_subtitle">Songs by genre</string>

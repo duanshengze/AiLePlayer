@@ -5,15 +5,37 @@ package com.superdan.app.aileplayer;
  */
 
 
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaButtonReceiver;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.media.MediaRouter;
 
+import com.google.android.gms.cast.ApplicationMetadata;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
+import com.superdan.app.aileplayer.model.MusicProvider;
+import com.superdan.app.aileplayer.playback.CastPlayback;
+import com.superdan.app.aileplayer.playback.LocalPlayback;
+import com.superdan.app.aileplayer.playback.Playback;
 import com.superdan.app.aileplayer.playback.PlaybackManager;
+import com.superdan.app.aileplayer.playback.QueueManager;
+import com.superdan.app.aileplayer.ui.NowPlayingActivity;
 import com.superdan.app.aileplayer.utils.LogHelper;
+import com.superdan.app.aileplayer.utils.MediaIDHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
@@ -103,36 +125,248 @@ public class MusicService extends MediaBrowserServiceCompat implements PlaybackM
 
     private static final String TAG= LogHelper.makeLogTag(MusicService.class);
 
+    public static final String APP_PACKAGE="com.superdan.app.aileplayer";
+    //当前cast 连接的设备
     public static final String EXTRA_CONNECTED_CAST="com.superdan.app.aileplayer.CAST_NAME";
+    //包含需要执行的操作
+    public static final String ACTION_CMD=APP_PACKAGE+".ACTION_CMD";
+
+    public static  final String CMD_NAME="CMD_NAME";
+    //表明播放停止
+    public static  final  String CMD_PAUSE="CMD_PAUSE";
+
+    //CMD_NAME 的键，用来指示 音乐播放应该切换到本地
+    public static  final  String CMD_STOP_CASTING="CMD_STOP_CASTING";
+    //延迟关掉自己 通过Handler
+    public static final int STOP_DELAY=30000;
+
+    private MusicProvider mMusicProvider;
+
+    private PlaybackManager mPlaybackManager;
+
+    private MediaSessionCompat mSession;
+
+    private  MediaNotificationManager mMediaNotificationManager;
+
+    private Bundle mSessionExtras;
+
+    private final  DelayedStopHandler mDelayedStopHandler=new DelayedStopHandler(this);
+
+    private MediaRouter mMediaRouter;
+
+    private PackageValidator mPackageValidator;
+    private boolean mIsConnectedToCar;
+    private BroadcastReceiver mBroadcastReceiver;
+
+
+    /**
+     负责切换播放状态的实例的客户端，依据是否连接到远程播放器
+    * */
+    private final VideoCastConsumerImpl mCastConsumer=new VideoCastConsumerImpl(){
+        @Override
+        public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
+          //如果我们正在casting，发送设备的名称作为extra在MediaSession metadata
+            mSessionExtras.putString(EXTRA_CONNECTED_CAST, VideoCastManager.getInstance().getDeviceName());
+            mSession.setExtras(mSessionExtras);
+            //现在切换palyback
+            Playback playback=new CastPlayback(mMusicProvider);
+            mMediaRouter.setMediaSessionCompat(mSession);
+            mPlaybackManager.switchToPlayback(playback,true);
+        }
+
+        @Override
+        public void onDisconnectionReason(int reason) {
+            LogHelper.d(TAG,"onDistance");
+            //这是我们更新基础流最后机会，在onDisconnected(),底层CastPlayback#mVideoCastConsumer 断开，因此
+            //我们更新本地流的位置
+            mPlaybackManager.getPlayback().updateLastKnownStreamPosition();
+        }
+
+        @Override
+        public void onDisconnected() {
+            LogHelper.d(TAG,"onDistanested");
+            mSessionExtras.remove(EXTRA_CONNECTED_CAST);
+            mSession.setExtras(mSessionExtras);
+            Playback playback=new LocalPlayback(MusicService.this,mMusicProvider);
+            mMediaRouter.setMediaSessionCompat(null);
+            mPlaybackManager.switchToPlayback(playback,false);
+
+        }
+    };
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        LogHelper.d(TAG,"onCreate");
+        mMusicProvider=new MusicProvider();
+
+        //为了使应用程序的响应，立即抓取和缓存目录信息
+        //这可以提高改善方法//响应时间 {@link #onLoadChildren(String, Result<List<MediaItem>>) onLoadChildren()}
+        mMusicProvider.retrieveMedisAsync(null);
+        mPackageValidator=new PackageValidator(this);
+
+        QueueManager queueManager=new QueueManager(mMusicProvider, getResources(), new QueueManager.MetadataUpdateListener() {
+            @Override
+            public void onMetadatChanged(MediaMetadataCompat metadata) {
+                mSession.setMetadata(metadata);
+            }
+
+            /**
+             * 当前Metadata为空时更新播放状态
+             */
+            @Override
+            public void onMetadataRetrieveError() {
+                mPlaybackManager.updatePlaybackState(getString(R.string.error_no_metadata));
+            }
+
+            @Override
+            public void onCurrentQueueIndexUpdated(int queueIndex) {
+                mPlaybackManager.handlePlayRequest();
+            }
+
+            @Override
+            public void onQueueUpdated(String title, List<MediaSessionCompat.QueueItem> newQueue) {
+                mSession.setQueue(newQueue);
+                mSession.setQueueTitle(title);
+            }
+        });
+        LocalPlayback playback=new LocalPlayback(this,mMusicProvider);
+        mPlaybackManager=new PlaybackManager(this,getResources(),mMusicProvider,queueManager,playback);
+
+        //开启一个MediaSeesion
+        mSession=new MediaSessionCompat(this,"MusicService");
+
+        //?? TODO: 2016/4/27
+        mSession.setCallback(mPlaybackManager.getMediaSeesionCallback());
+        //为session设置flag 表明可以控制媒体按钮，可以通过回调 MediaSessionCompat.Callback开控制
+        mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS|MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        Context context=getApplicationContext();
+        Intent intent=new Intent(context, NowPlayingActivity.class);
+        PendingIntent pi=PendingIntent.getActivity(context,99/*request code*/,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        mSession.setSessionActivity(pi);
+
+        mSessionExtras=new Bundle();
+//        CarHelper.setSlotReservationFlags(mSessionExtras, true, true, true);
+//        WearHelper.setSlotReservationFlags(mSessionExtras, true, true);
+//        WearHelper.setUseBackgroundFromTheme(mSessionExtras, true);
+            mSession.setExtras(mSessionExtras);
+        mPlaybackManager.updatePlaybackState(null);
+        try{
+            mMediaNotificationManager=new MediaNotificationManager(this);
+        }catch (RemoteException e){
+            throw  new IllegalStateException("Could not create a MediaNotificationManager",e);
+        }
+            VideoCastManager.getInstance().addVideoCastConsumer(mCastConsumer);
+        mMediaRouter=MediaRouter.getInstance(getApplicationContext());
+
+
+    }
+
+
+    @Override
+    public int onStartCommand(Intent startIntent, int flags, int startId) {
+        if(startIntent!=null){
+            String action=startIntent.getAction();
+            String command=startIntent.getStringExtra(CMD_NAME);
+            if(ACTION_CMD.equals(action)){
+                if(CMD_PAUSE.equals(command)){
+                    mPlaybackManager.handlePauseRequest();
+                }else if(CMD_STOP_CASTING.equals(command)){
+                    VideoCastManager.getInstance().disconnect();
+                }
+            }else {
+                MediaButtonReceiver.handleIntent(mSession,startIntent);
+            }
+        }
+        //复位延时处理程序排队消息（停止服务），如果服务不在播放
+
+        mDelayedStopHandler.removeCallbacksAndMessages(null);
+        mDelayedStopHandler.sendEmptyMessageDelayed(0,STOP_DELAY);
+        return  START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        LogHelper.d(TAG,"onDestory");
+
+        // 服务正在被消掉，因此我们要释放我们的资源
+        mPlaybackManager.handleStopRequest(null);
+        mMediaNotificationManager.stopNotification();
+        VideoCastManager.getInstance().removeVideoCastConsumer(mCastConsumer);
+        mDelayedStopHandler.removeCallbacksAndMessages(null);
+        mSession.release();
+    }
 
     @Nullable
     @Override
     public BrowserRoot onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
-        return null;
+
+        LogHelper.d(TAG,"OnGetRoot:clientPackageName="+clientPackageName,"; clientuid="+clientUid
+        +"; rootHints=",rootHints);
+        if(!mPackageValidator.isCallerAllowed(this,clientPackageName,clientUid)){
+            LogHelper.w(TAG,"OnGetRoot: IGNORING request from untrusted package"+clientPackageName);
+            return  null;
+
+        }
+
+        return new BrowserRoot(MediaIDHelper.MEDIA_ID_ROOT,null);
     }
 
     @Override
     public void onLoadChildren(String parentId, Result<List<MediaBrowserCompat.MediaItem>> result) {
-
+            LogHelper.d(TAG,"OnLoadChildren:parentId=",parentId);
+        result.sendResult(mMusicProvider.getChildren(parentId,getResources()));
     }
 
+    /**
+     * Callback 方法（PackbackManager）只要音乐即将播放
+     */
     @Override
     public void onPlaybackStart() {
-
+        if(!mSession.isActive()){
+            mSession.setActive(true);
+        }
     }
 
     @Override
     public void onNotificationRequired() {
-
+        mMediaNotificationManager.startNotification();
     }
 
     @Override
     public void onPlaybackStop() {
-
+        mDelayedStopHandler.removeCallbacksAndMessages(null);
+        mDelayedStopHandler.sendEmptyMessageDelayed(0,STOP_DELAY);
+        stopForeground(true);
     }
 
     @Override
     public void onPlaybackStateUpdated(PlaybackStateCompat newState) {
+        mSession.setPlaybackState(newState);
+    }
 
+
+
+
+    private static class DelayedStopHandler extends Handler{
+        private final WeakReference<MusicService>mWeakReference;
+        private  DelayedStopHandler(MusicService service){
+            mWeakReference=new WeakReference<MusicService>(service);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+           MusicService service=mWeakReference.get();
+            if(service!=null&&service.mPlaybackManager.getPlayback()!=null){
+                if(service.mPlaybackManager.getPlayback().isPlaying()){
+                    LogHelper.d(TAG,"Ignoring delayed stop since the media player is in use.");
+                    return;
+                }
+                LogHelper.d(TAG,"Stopping service with delay handler.");
+                service.stopSelf();
+            }
+        }
     }
 }

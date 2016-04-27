@@ -2,15 +2,12 @@ package com.superdan.app.aileplayer.model;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.media.MediaMetadata;
-import android.media.MediaMetadataRetriever;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
 
 import com.superdan.app.aileplayer.R;
 import com.superdan.app.aileplayer.utils.LogHelper;
@@ -130,7 +127,7 @@ public class MusicProvider {
         return searchMusic(MediaMetadataCompat.METADATA_KEY_ALBUM, query);
     }
 
-    public Iterable<MediaMetadataCompat> searchMusicByArtisit(String query) {
+    public Iterable<MediaMetadataCompat> searchMusicArtist(String query) {
         return searchMusic(MediaMetadataCompat.METADATA_KEY_ARTIST, query);
     }
 
@@ -270,14 +267,21 @@ public class MusicProvider {
             return  mediaItems;
         }
         if (MediaIDHelper.MEDIA_ID_ROOT.equals(mediaId)){
-
             mediaItems.add(createBrowsableMediaItemForRoot(resources));
         }else if (MediaIDHelper.MEDIA_ID_MUSIC_BY_GENRE.equals(mediaId)){
             for(String genre:getGenres()){
                 mediaItems.add(createbrowsableMediaItemForGenre(genre,resources));
             }
-        }else
+        }else if(mediaId.startsWith(MediaIDHelper.MEDIA_ID_MUSIC_BY_GENRE)){
+            String genre=MediaIDHelper.getHierarchy(mediaId)[1];
+            for(MediaMetadataCompat metadata:getMusicByGenre(genre)){
+                mediaItems.add(createMediaItem( metadata));
+            }
 
+        }else {
+            LogHelper.w(TAG,"Skipping unmatched mediaId: ",mediaId);
+        }
+        return  mediaItems;
 
 
     }

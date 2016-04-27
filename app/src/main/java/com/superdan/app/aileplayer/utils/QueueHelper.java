@@ -46,7 +46,7 @@ public class QueueHelper {
 
     public static List<MediaSessionCompat.QueueItem>getPlayingQueueFromSearch(String query, Bundle queueParams,MusicProvider musicProvider){
 
-        LogHelper.d(TAG,"Creating playing queue for musics from search: ",query," params:",queueParams)
+        LogHelper.d(TAG,"Creating playing queue for musics from search: ",query," params:",queueParams);
         VoiceSearchParams params=new VoiceSearchParams(query,queueParams);
         LogHelper.e(TAG,"VoiceSearchParams: ",params);
 
@@ -63,7 +63,7 @@ public class QueueHelper {
         }else if(params.isArtistFocus){
             result=musicProvider.searchMusicArtist(params.artist);
         }else if(params.isSongFocus){
-            result=musicProvider.searchMusicBysongTitle(params.song);
+            result=musicProvider.searchMusicBySongTitle(params.song);
         }
         // If there was no results using media focus parameter, we do an unstructured query.
         // This is useful when the user is searching for something that looks like an artist
