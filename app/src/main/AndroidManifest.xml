@@ -33,15 +33,13 @@ TV and regular devices. -->
         </activity>
         <service android:name=".MusicService"
             android:exported="true"
-
             >
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService"/>
             </intent-filter>
-
-
         </service>
 
+        <activity android:name=".ui.PlaceholderActivity"></activity>
 
         <activity android:name=".ui.FullScreenPlayerActivity"
                   android:label="@string/app_name"
